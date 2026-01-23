@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDFStamp - Pro Business Tool V6.1 (Fix Restore)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Sarabun', sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #333; }
+        
+        /* --- HEADER --- */
+        .header-bar {
+            height: 50px; background: #222; color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: bold; border-bottom: 1px solid #444; flex-shrink: 0; z-index: 20; position: relative;
+        }
+        .header-bar span { color: #007bff; }
+
+        /* --- MAIN LAYOUT --- */
+        .main-container { display: flex; flex-grow: 1; overflow: hidden; height: calc(100vh - 50px); }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 320px; background: #2c3e50; color: white; display: flex; flex-direction: column; border-right: 1px solid #444; padding: 15px; overflow-y: auto; flex-shrink: 0; z-index: 2; }
+        .sidebar h2 { margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid #4a6278; padding-bottom: 10px; color: #ecf0f1; }
+        
+        .upload-box { background: #34495e; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px; border: 2px dashed #7f8c8d; cursor: pointer; transition: 0.2s; }
+        .upload-box:hover { background: #3d566e; border-color: #bdc3c7; }
+        .upload-box p { margin: 5px 0 0; font-size: 0.8rem; color: #ecf0f1; }
+
+        .file-list { display: flex; flex-direction: column; gap: 10px; }
+        .file-item { background: white; color: #333; border-radius: 5px; padding: 10px; border-left: 5px solid transparent; }
+        
+        .file-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.85rem; margin-bottom: 8px;}
+        .file-remove { color: red; cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
+        
+        /* ปุ่ม All แบบใหม่ */
+        .btn-all { 
+            background: #17a2b8; color: white; border: none; border-radius: 3px; 
+            padding: 2px 6px; font-size: 0.7rem; cursor: pointer; margin-left: 5px;
+        }
+        .btn-all:hover { background: #138496; }
+
+        .page-selector { display: flex; flex-wrap: wrap; gap: 4px; }
+        .page-btn {
+            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; border: 1px solid #ccc; background: #f8f9fa; cursor: pointer; border-radius: 3px; color: #ccc; 
+        }
+        .page-btn.selected { background: #28a745; color: white; border-color: #28a745; font-weight: bold; }
+        .page-btn:hover { border-color: #007bff; }
+
+        /* --- WORKSPACE --- */
+        .workspace { flex-grow: 1; background: #555; display: flex; flex-direction: column; position: relative; height: 100%; }
+
+        .toolbar {
+            background: white; padding: 8px 15px; display: flex; gap: 10px; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; height: 70px; flex-shrink: 0;
+        }
+
+        .canvas-scroll-area {
+            flex-grow: 1; overflow: auto; padding: 30px; background: #666;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        #scalableContent { display: flex; flex-direction: column; gap: 30px; transform-origin: top center; transition: transform 0.1s ease-out; }
+
+        .canvas-wrapper-card { background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
+        .page-label {
+            position: absolute; top: -28px; left: 0; color: white; font-size: 0.9rem;
+            background: #444; padding: 4px 10px; border-radius: 4px 4px 0 0; display: flex; align-items: center; gap: 5px; white-space: nowrap;
+        }
+        .page-label span { font-weight: bold; color: #4db8ff; }
+
+        /* Controls */
+        input[type="file"] { display: none; }
+        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+        .btn-blue { background: #007bff; color: white; } .btn-blue:hover { background: #0056b3; }
+        .btn-green { background: #27ae60; color: white; } .btn-green:hover { background: #219150; }
+        .btn-red { background: #e74c3c; color: white; } .btn-red:hover { background: #c0392b; }
+        .btn-orange { background: #e67e22; color: white; } .btn-orange:hover { background: #d35400; }
+        .btn-purple { background: #6f42c1; color: white; } .btn-purple:hover { background: #59359a; }
+        .btn-dark { background: #343a40; color: white; } .btn-dark:hover { background: #23272b; }
+        
+        .control-group { display: flex; align-items: center; gap: 5px; padding: 0 10px; border-left: 1px solid #ddd; }
+        .download-group { margin-left: auto; border-left: 1px solid #ddd; padding-left: 10px; display: flex; gap: 5px;}
+
+        .format-select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #333; cursor: pointer; }
+        .slot-select { padding: 8px; border: 2px solid #e67e22; border-radius: 4px; font-weight: bold; color: #e67e22; cursor: pointer; background: #fff5eb; }
+
+        .stamp-gallery-container { display: flex; align-items: center; gap: 8px; overflow-x: auto; max-width: 250px; height: 100%; padding: 0 5px; }
+        .stamp-thumb { height: 50px; width: auto; object-fit: contain; border: 2px solid transparent; cursor: pointer; background: #fff; padding: 2px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.1s; }
+        .stamp-thumb:hover { border-color: #007bff; transform: scale(1.05); }
+
+        #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; z-index: 2000; justify-content: center; align-items: center; flex-direction: column; }
+        .empty-state { color: #ccc; text-align: center; margin-top: 50px; font-size: 1.2rem; width: 100%; }
+        .zoom-label { font-size: 0.8rem; color: #555; width: 40px; text-align: center;}
+    </style>
+</head>
+<body>
+
+    <div id="loadingOverlay">
+        <h2>⏳ กำลังประมวลผล...</h2>
+        <p>กรุณารอสักครู่ (อาจใช้เวลาหากไฟล์มีขนาดใหญ่)</p>
+    </div>
+
+    <div class="header-bar">PDF<span>Stamp</span></div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <h2>📂 1. จัดการเอกสาร</h2>
+            <label for="docUpload" class="upload-box">
+                <span style="font-size: 1.5rem;">+ เพิ่มเอกสาร</span>
+                <p>(PDF หรือ รูปภาพ)</p>
+            </label>
+            <input type="file" id="docUpload" accept="image/*,application/pdf" multiple>
+            <div id="fileList" class="file-list"></div>
+        </div>
+
+        <div class="workspace">
+            <div class="toolbar">
+                <label for="stampUpload" class="btn btn-blue">©️ ลายเซ็น</label>
+                <input type="file" id="stampUpload" accept="image/png,image/jpeg" multiple>
+                <div class="stamp-gallery-container" id="stampGallery"></div>
+                
+                <div class="control-group">
+                    <select id="slotSelect" class="slot-select" onchange="loadFromSlot(this.value)">
+                        <option value="1">Slot 1</option>
+                        <option value="2">Slot 2</option>
+                        <option value="3">Slot 3</option>
+                        <option value="4">Slot 4</option>
+                        <option value="5">Slot 5</option>
+                    </select>
+                    <button class="btn btn-orange" onclick="saveToCurrentSlot()">💾 บันทึก</button>
+                    <button class="btn btn-purple" onclick="loadFromCurrentSlot()">📂 คืนค่า</button>
+                </div>
+
+                <div class="control-group">
+                    <button class="btn btn-red" onclick="clearAllSignatures()">❌ ลบ</button>
+                </div>
+
+                <div class="control-group">
+                    <button class="btn btn-dark" onclick="adjustZoom(-0.1)">➖</button>
+                    <span id="zoomDisplay" class="zoom-label">100%</span>
+                    <button class="btn btn-dark" onclick="adjustZoom(0.1)">➕</button>
+                </div>
+                
+                <div class="download-group">
+                    <select id="dlFormat" class="format-select">
+                        <option value="pdf">PDF</option>
+                        <option value="jpg">JPG</option>
+                    </select>
+                    <button class="btn btn-green" onclick="downloadAllFiles()">⬇️ โหลด</button>
+                </div>
+            </div>
+
+            <div class="canvas-scroll-area">
+                <div id="scalableContent">
+                    <div class="empty-state">เลือกเอกสารและหน้าทางซ้าย เพื่อเริ่มเซ็น</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let projectFiles = []; 
+        let activeCanvases = []; 
+        let masterStampsJSON = null; 
+        let currentZoom = 1.0;
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        // ------------------------------------------
+        // 1. INIT & SMART RESTORE
+        // ------------------------------------------
+        window.addEventListener('DOMContentLoaded', () => {
+            const lastSlot = localStorage.getItem('pdfstamp_last_slot') || "1";
+            document.getElementById('slotSelect').value = lastSlot;
+            loadFromSlot(lastSlot, true); 
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                activeCanvases.forEach(item => {
+                    const activeObjects = item.canvas.getActiveObjects();
+                    if (activeObjects.length) {
+                        item.canvas.discardActiveObject();
+                        activeObjects.forEach(obj => item.canvas.remove(obj));
+                    }
+                });
+            }
+        });
+
+        function adjustZoom(delta) {
+            currentZoom += delta;
+            if (currentZoom < 0.1) currentZoom = 0.1;
+            if (currentZoom > 5.0) currentZoom = 5.0;
+            document.getElementById('scalableContent').style.transform = `scale(${currentZoom})`;
+            document.getElementById('zoomDisplay').innerText = Math.round(currentZoom * 100) + '%';
+        }
+
+        // ------------------------------------------
+        // 2. SIDEBAR & ALL BUTTON
+        // ------------------------------------------
+        document.getElementById('docUpload').addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            if(files.length === 0) return;
+            showLoading(true);
+            for (let file of files) {
+                const fileId = Date.now() + Math.random().toString(16).slice(2);
+                let pages = 1;
+                let pdfDoc = null;
+                if (file.type === 'application/pdf') {
+                    const arrayBuffer = await file.arrayBuffer();
+                    pdfDoc = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    pages = pdfDoc.numPages;
+                }
+                projectFiles.push({
+                    id: fileId, file: file, name: file.name, type: file.type, pdfDoc: pdfDoc,
+                    totalPages: pages, selectedPages: [1] 
+                });
+            }
+            renderSidebar();
+            renderRightPanel(); 
+            showLoading(false);
+            e.target.value = '';
+        });
+
+        function renderSidebar() {
+            const listEl = document.getElementById('fileList');
+            listEl.innerHTML = '';
+            projectFiles.forEach(doc => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                
+                const header = document.createElement('div');
+                header.className = 'file-header';
+                
+                const nameWrap = document.createElement('div');
+                nameWrap.style.display = 'flex';
+                nameWrap.style.alignItems = 'center';
+                nameWrap.innerHTML = `<span>📄 ${doc.name}</span>`;
+                
+                const allBtn = document.createElement('button');
+                allBtn.className = 'btn-all';
+                allBtn.innerText = 'All';
+                allBtn.onclick = (e) => { e.stopPropagation(); toggleAllPages(doc.id); };
+                nameWrap.appendChild(allBtn);
+                header.appendChild(nameWrap);
+
+                const removeBtn = document.createElement('span');
+                removeBtn.className = 'file-remove';
+                removeBtn.innerHTML = '&times;';
+                removeBtn.onclick = (e) => { e.stopPropagation(); removeFile(doc.id); };
+                header.appendChild(removeBtn);
+                item.appendChild(header);
+
+                const pageContainer = document.createElement('div');
+                pageContainer.className = 'page-selector';
+                for (let i = 1; i <= doc.totalPages; i++) {
+                    const pageBtn = document.createElement('div');
+                    pageBtn.innerText = i;
+                    pageBtn.className = doc.selectedPages.includes(i) ? 'page-btn selected' : 'page-btn';
+                    pageBtn.onclick = (e) => { e.stopPropagation(); togglePageSelection(doc.id, i); };
+                    pageContainer.appendChild(pageBtn);
+                }
+                item.appendChild(pageContainer);
+                listEl.appendChild(item);
+            });
+        }
+
+        function toggleAllPages(fileId) {
+            const doc = projectFiles.find(f => f.id === fileId);
+            if (!doc) return;
+            if (doc.selectedPages.length === doc.totalPages) {
+                doc.selectedPages = [];
+            } else {
+                doc.selectedPages = Array.from({length: doc.totalPages}, (_, i) => i + 1);
+            }
+            renderSidebar();
+            renderRightPanel();
+        }
+
+        function togglePageSelection(fileId, pageNum) {
+            const doc = projectFiles.find(f => f.id === fileId);
+            if (!doc) return;
+            if (doc.selectedPages.includes(pageNum)) {
+                doc.selectedPages = doc.selectedPages.filter(p => p !== pageNum);
+            } else {
+                doc.selectedPages.push(pageNum);
+                doc.selectedPages.sort((a,b) => a-b);
+            }
+            renderSidebar();
+            renderRightPanel(); 
+        }
+
+        function removeFile(id) {
+            projectFiles = projectFiles.filter(f => f.id !== id);
+            renderSidebar();
+            renderRightPanel();
+        }
+
+        // ------------------------------------------
+        // 3. WORKSPACE RENDERING
+        // ------------------------------------------
+        async function renderRightPanel() {
+            const container = document.getElementById('scalableContent');
+            container.innerHTML = '';
+            activeCanvases = []; 
+
+            if (projectFiles.length === 0) {
+                container.innerHTML = '<div class="empty-state">เลือกเอกสารและหน้าทางซ้าย เพื่อเริ่มเซ็น</div>';
+                return;
+            }
+
+            let hasSelection = false;
+            for (let doc of projectFiles) {
+                for (let pageNum of doc.selectedPages) {
+                    hasSelection = true;
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'canvas-wrapper-card';
+                    const label = document.createElement('div');
+                    label.className = 'page-label';
+                    label.innerHTML = `ไฟล์: <span>${doc.name}</span> - หน้า <span>${pageNum}</span>`;
+                    wrapper.appendChild(label);
+
+                    const canvasEl = document.createElement('canvas');
+                    canvasEl.id = `c_${doc.id}_${pageNum}`;
+                    wrapper.appendChild(canvasEl);
+                    container.appendChild(wrapper);
+
+                    const fabricInstance = new fabric.Canvas(canvasEl.id);
+                    let width, height, imgUrl;
+                    const renderScale = 2.0; 
+
+                    if (doc.type === 'application/pdf') {
+                        const page = await doc.pdfDoc.getPage(pageNum);
+                        const viewport = page.getViewport({ scale: renderScale });
+                        const tempCan = document.createElement('canvas');
+                        tempCan.width = viewport.width; tempCan.height = viewport.height;
+                        await page.render({ canvasContext: tempCan.getContext('2d'), viewport }).promise;
+                        imgUrl = tempCan.toDataURL();
+                        width = viewport.width; height = viewport.height;
+                    } else {
+                        imgUrl = await readFileAsDataURL(doc.file);
+                        const imgObj = await loadImage(imgUrl);
+                        width = imgObj.width; height = imgObj.height;
+                    }
+
+                    await new Promise(r => {
+                        fabric.Image.fromURL(imgUrl, (img) => {
+                            fabricInstance.setWidth(width);
+                            fabricInstance.setHeight(height);
+                            fabricInstance.setBackgroundImage(img, fabricInstance.renderAll.bind(fabricInstance));
+                            r();
+                        });
+                    });
+
+                    if (masterStampsJSON) {
+                        await applyMasterStamps(fabricInstance);
+                    }
+                    activeCanvases.push({ fileId: doc.id, pageNum: pageNum, canvas: fabricInstance });
+                }
+            }
+            if (!hasSelection) container.innerHTML = '<div class="empty-state">กรุณาเลือกหน้าเอกสารด้านซ้าย</div>';
+        }
+
+        // ------------------------------------------
+        // 4. SLOT & STAMP LOGIC
+        // ------------------------------------------
+        document.getElementById('stampUpload').addEventListener('change', function(e) {
+            Array.from(e.target.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (f) => {
+                    addToGallery(f.target.result);
+                    addStampToAll(f.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        function addToGallery(src) {
+            const img = document.createElement('img');
+            img.src = src; img.className = 'stamp-thumb';
+            img.onclick = () => addStampToAll(src);
+            document.getElementById('stampGallery').appendChild(img);
+        }
+
+        function addStampToAll(url) {
+            if (activeCanvases.length === 0) return alert('ไม่มีหน้าเอกสารแสดงอยู่');
+            activeCanvases.forEach(item => {
+                fabric.Image.fromURL(url, (img) => {
+                    img.scale(0.5); 
+                    img.set({ left: item.canvas.width/2 - (img.width*img.scaleX)/2, top: item.canvas.height/2 - (img.height*img.scaleY)/2 });
+                    item.canvas.add(img);
+                    item.canvas.setActiveObject(img);
+                });
+            });
+        }
+
+        // --- Slot Logic ---
+        function saveToCurrentSlot() {
+            if (activeCanvases.length === 0) return;
+            const slot = document.getElementById('slotSelect').value;
+            const firstCanvas = activeCanvases[0].canvas;
+            const objects = firstCanvas.getObjects();
+            
+            if (objects.length === 0) return alert('หน้าแรกไม่มีลายเซ็นให้จำ');
+            
+            const jsonStr = JSON.stringify(firstCanvas.toJSON(['id']).objects);
+            localStorage.setItem(`pdfstamp_slot_${slot}_pos`, jsonStr);
+            
+            const imgObj = objects.find(o => o.type === 'image');
+            if (imgObj) {
+                localStorage.setItem(`pdfstamp_slot_${slot}_img`, imgObj.getSrc());
+            }
+            
+            localStorage.setItem('pdfstamp_last_slot', slot);
+            masterStampsJSON = jsonStr; 
+            alert(`✅ บันทึกค่าลง Slot ${slot} เรียบร้อย`);
+        }
+
+        function loadFromCurrentSlot() {
+            const slot = document.getElementById('slotSelect').value;
+            loadFromSlot(slot);
+        }
+
+        // 🟢 FIX HERE: Changed logic to re-render panel instead of clearing canvas
+        function loadFromSlot(slot, silent = false) {
+            const savedPos = localStorage.getItem(`pdfstamp_slot_${slot}_pos`);
+            const savedImg = localStorage.getItem(`pdfstamp_slot_${slot}_img`);
+
+            if (savedPos) {
+                masterStampsJSON = savedPos;
+                localStorage.setItem('pdfstamp_last_slot', slot); 
+                if(!silent) alert(`📂 เรียกค่าจาก Slot ${slot} แล้ว`);
+                
+                if (savedImg) {
+                    addToGallery(savedImg);
+                }
+                
+                // FIXED: Call renderRightPanel() directly to refresh view cleanly with new stamps
+                if (activeCanvases.length > 0) {
+                    renderRightPanel();
+                }
+            } else {
+                if(!silent) alert(`Slot ${slot} ว่างเปล่า`);
+                masterStampsJSON = null;
+            }
+        }
+
+        function clearAllSignatures(confirmDelete = true) {
+            if(confirmDelete && !confirm('ยืนยันลบลายเซ็นทั้งหมดในทุกหน้า?')) return;
+            activeCanvases.forEach(item => item.canvas.clear());
+            if(confirmDelete) renderRightPanel(); 
+        }
+
+        function applyMasterStamps(canvasInstance) {
+            return new Promise(resolve => {
+                fabric.util.enlivenObjects(JSON.parse(masterStampsJSON), (objs) => {
+                    objs.forEach(o => { o.set('dirty', true); canvasInstance.add(o); });
+                    canvasInstance.renderAll();
+                    resolve();
+                });
+            });
+        }
+
+        // ------------------------------------------
+        // 5. DOWNLOAD
+        // ------------------------------------------
+        function downloadAllFiles() {
+            const format = document.getElementById('dlFormat').value;
+            if (format === 'pdf') downloadAllFilesPDFZip();
+            else downloadAllFilesJPGZip();
+        }
+
+        async function downloadAllFilesPDFZip() {
+            if (projectFiles.length === 0) return alert('ไม่มีไฟล์');
+            showLoading(true);
+            const zip = new JSZip();
+            const { jsPDF } = window.jspdf;
+
+            for (let f of projectFiles) {
+                const pdfDoc = new jsPDF();
+                pdfDoc.deletePage(1);
+                
+                for (let i = 1; i <= f.totalPages; i++) {
+                    const {data, width, height} = await getRenderedPageData(f, i, f.selectedPages.includes(i));
+                    const orientation = width > height ? 'l' : 'p';
+                    pdfDoc.addPage([width, height], orientation);
+                    pdfDoc.addImage(data, 'JPEG', 0, 0, width, height);
+                }
+                const pdfBlob = pdfDoc.output('blob');
+                zip.file(`${f.name}_signed.pdf`, pdfBlob);
+            }
+            saveAs(await zip.generateAsync({ type: "blob" }), "Signed_Documents.zip");
+            showLoading(false);
+        }
+
+        async function downloadAllFilesJPGZip() {
+            if (projectFiles.length === 0) return alert('ไม่มีไฟล์');
+            showLoading(true);
+            const zip = new JSZip();
+            for (let f of projectFiles) {
+                const folder = zip.folder(f.name);
+                for (let i = 1; i <= f.totalPages; i++) {
+                    const {data} = await getRenderedPageData(f, i, f.selectedPages.includes(i));
+                    const blob = await (await fetch(data)).blob();
+                    folder.file(`Page_${i}.jpg`, blob);
+                }
+            }
+            saveAs(await zip.generateAsync({ type: "blob" }), "Signed_Images_JPG.zip");
+            showLoading(false);
+        }
+
+        async function getRenderedPageData(doc, pageNum, forceStamp = true) {
+            const active = activeCanvases.find(c => c.fileId === doc.id && c.pageNum === pageNum);
+            if (active && forceStamp) {
+                return {
+                    data: active.canvas.toDataURL({ format: 'jpeg', quality: 0.8 }),
+                    width: active.canvas.width, height: active.canvas.height
+                };
+            } else {
+                return await renderOffScreen(doc, pageNum, forceStamp);
+            }
+        }
+
+        async function renderOffScreen(doc, pageNum, includeStamp) {
+            const tempCanvasEl = document.createElement('canvas');
+            const fabricTemp = new fabric.Canvas(tempCanvasEl);
+            let width, height;
+
+            if (doc.type === 'application/pdf') {
+                const page = await doc.pdfDoc.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 2.0 });
+                width = viewport.width; height = viewport.height;
+                tempCanvasEl.width = width; tempCanvasEl.height = height;
+                await page.render({ canvasContext: tempCanvasEl.getContext('2d'), viewport }).promise;
+                
+                const imgUrl = tempCanvasEl.toDataURL();
+                await new Promise(r => fabric.Image.fromURL(imgUrl, img => {
+                    fabricTemp.setWidth(width); fabricTemp.setHeight(height);
+                    fabricTemp.setBackgroundImage(img, r);
+                }));
+            } else {
+                const url = await readFileAsDataURL(doc.file);
+                await new Promise(r => fabric.Image.fromURL(url, img => {
+                    width = img.width; height = img.height;
+                    fabricTemp.setWidth(width); fabricTemp.setHeight(height);
+                    fabricTemp.setBackgroundImage(img, r);
+                }));
+            }
+
+            if (includeStamp && masterStampsJSON) {
+                await applyMasterStamps(fabricTemp);
+            }
+            const data = fabricTemp.toDataURL({ format: 'jpeg', quality: 0.8 });
+            fabricTemp.dispose();
+            return { data, width, height };
+        }
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+        function loadImage(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.src = url;
+            });
+        }
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+        }
+    </script>
+</body>
+</html>
