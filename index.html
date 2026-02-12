@@ -1,43 +1,757 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PDFStamp Pro</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-<style>*{box-sizing:border-box}body{font-family:Sarabun,sans-serif;margin:0;height:100vh;display:flex;flex-direction:column;overflow:hidden;background:#333}.header-bar{height:50px;background:#222;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;border-bottom:1px solid #444;z-index:20}.header-bar span{color:#007bff}.main-container{display:flex;flex-grow:1;overflow:hidden;height:calc(100vh - 50px)}.sidebar{width:320px;background:#2c3e50;color:#fff;display:flex;flex-direction:column;border-right:1px solid #444;padding:15px;overflow-y:auto;flex-shrink:0}.upload-box{background:#34495e;padding:15px;border-radius:6px;text-align:center;margin-bottom:15px;border:2px dashed #7f8c8d;cursor:pointer}.file-item{background:#fff;color:#333;border-radius:5px;padding:10px;margin-bottom:10px}.file-header{display:flex;justify-content:space-between;font-weight:700;font-size:.85rem;margin-bottom:8px}.page-btn{width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-size:.8rem;border:1px solid #ccc;background:#f8f9fa;cursor:pointer;margin:2px;border-radius:3px;color:#ccc}.page-btn.selected{background:#28a745;color:#fff;border-color:#28a745}.workspace{flex-grow:1;background:#555;display:flex;flex-direction:column;position:relative}.toolbar{background:#fff;padding:8px 15px;display:flex;gap:10px;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,.2);z-index:10;height:70px}.canvas-scroll-area{flex-grow:1;overflow:auto;padding:30px;background:#666;display:flex;flex-direction:column;align-items:center}#scalableContent{transform-origin:top center;display:flex;flex-direction:column;gap:30px}.canvas-wrapper-card{background:#fff;box-shadow:0 5px 15px rgba(0,0,0,.3);position:relative}.page-label{position:absolute;top:-28px;left:0;color:#fff;font-size:.9rem;background:#444;padding:4px 10px;border-radius:4px 4px 0 0}input[type=file]{display:none}.btn{padding:8px 12px;border:none;border-radius:4px;cursor:pointer;font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:5px}.btn-blue{background:#007bff;color:#fff}.btn-green{background:#27ae60;color:#fff}.btn-red{background:#e74c3c;color:#fff}.btn-orange{background:#e67e22;color:#fff}.btn-purple{background:#6f42c1;color:#fff}.control-group{display:flex;align-items:center;gap:5px;padding:0 10px;border-left:1px solid #ddd}.download-group{margin-left:auto;display:flex;gap:5px}.stamp-gallery-container{display:flex;gap:8px;overflow-x:auto;max-width:250px}#loadingOverlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);color:#fff;z-index:2000;justify-content:center;align-items:center;flex-direction:column}</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDFStamp - Pro Business Tool V16 (Smart Unlimited Text)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Sarabun', 'TH Sarabun PSK', sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #333; }
+        
+        .header-bar {
+            height: 50px; background: #222; color: white; display: flex; align-items: center; justify-content: center; gap: 20px;
+            font-size: 1.5rem; font-weight: bold; border-bottom: 1px solid #444; flex-shrink: 0; z-index: 20; position: relative;
+        }
+        .header-bar span { color: #007bff; }
+        
+        .project-btn-group { position: absolute; right: 20px; display: flex; gap: 10px; }
+        .btn-proj { font-size: 0.8rem; padding: 5px 10px; border-radius: 4px; cursor: pointer; border: 1px solid #555; background: #444; color: white; }
+        .btn-proj:hover { background: #666; }
+
+        .main-container { display: flex; flex-grow: 1; overflow: hidden; height: calc(100vh - 50px); }
+
+        .sidebar { width: 320px; background: #2c3e50; color: white; display: flex; flex-direction: column; border-right: 1px solid #444; padding: 15px; overflow-y: auto; flex-shrink: 0; z-index: 2; }
+        .sidebar h2 { margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid #4a6278; padding-bottom: 10px; color: #ecf0f1; }
+        
+        .upload-box { background: #34495e; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px; border: 2px dashed #7f8c8d; cursor: pointer; transition: 0.2s; }
+        .upload-box:hover { background: #3d566e; border-color: #bdc3c7; }
+        .upload-box p { margin: 5px 0 0; font-size: 0.8rem; color: #ecf0f1; }
+
+        .preset-box { margin-top: 20px; border-top: 1px solid #4a6278; padding-top: 15px; }
+        .preset-input-group { display: flex; gap: 5px; margin-bottom: 10px; }
+        .preset-input { flex-grow: 1; padding: 5px; border-radius: 4px; border: none; }
+        .preset-list { display: flex; flex-direction: column; gap: 5px; }
+        .preset-item { background: #34495e; padding: 8px; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .preset-item:hover { background: #3d566e; border-left: 3px solid #007bff; }
+        .preset-del { color: #e74c3c; font-weight: bold; cursor: pointer; padding: 0 5px; }
+
+        .file-list { display: flex; flex-direction: column; gap: 10px; }
+        .file-item { background: white; color: #333; border-radius: 5px; padding: 10px; border-left: 5px solid transparent; }
+        .file-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.85rem; margin-bottom: 8px;}
+        .file-remove { color: red; cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
+        
+        .btn-all { background: #17a2b8; color: white; border: none; border-radius: 3px; padding: 2px 6px; font-size: 0.7rem; cursor: pointer; margin-left: 5px; }
+        
+        .page-selector { display: flex; flex-wrap: wrap; gap: 4px; }
+        .page-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; border: 1px solid #ccc; background: #f8f9fa; cursor: pointer; border-radius: 3px; color: #ccc; }
+        .page-btn.selected { background: #28a745; color: white; border-color: #28a745; font-weight: bold; }
+
+        .workspace { flex-grow: 1; background: #555; display: flex; flex-direction: column; position: relative; height: 100%; }
+
+        .toolbar { background: white; padding: 5px 15px; display: flex; gap: 10px; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; height: 60px; flex-shrink: 0; overflow-x: auto; }
+
+        .canvas-scroll-area { flex-grow: 1; overflow: auto; padding: 30px; background: #666; display: flex; flex-direction: column; align-items: center; }
+        #scalableContent { display: flex; flex-direction: column; gap: 30px; transform-origin: top center; transition: transform 0.1s ease-out; }
+
+        .canvas-wrapper-card { background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
+        .page-label { position: absolute; top: -28px; left: 0; color: white; font-size: 0.9rem; background: #444; padding: 4px 10px; border-radius: 4px 4px 0 0; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+        .page-label span { font-weight: bold; color: #4db8ff; }
+
+        input[type="file"] { display: none; }
+        .btn { padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+        .btn-blue { background: #007bff; color: white; } .btn-blue:hover { background: #0056b3; }
+        .btn-green { background: #27ae60; color: white; } .btn-green:hover { background: #219150; }
+        .btn-red { background: #e74c3c; color: white; } .btn-red:hover { background: #c0392b; }
+        .btn-orange { background: #e67e22; color: white; } .btn-orange:hover { background: #d35400; }
+        .btn-purple { background: #6f42c1; color: white; } .btn-purple:hover { background: #59359a; }
+        .btn-dark { background: #343a40; color: white; } .btn-dark:hover { background: #23272b; }
+        .btn.active-tool { box-shadow: inset 0 0 0 2px #222; transform: scale(0.95); background-color: #ffd700; color: black; }
+
+        .control-group { display: flex; align-items: center; gap: 5px; padding: 0 10px; border-left: 1px solid #ddd; }
+        .download-group { margin-left: auto; border-left: 1px solid #ddd; padding-left: 10px; display: flex; gap: 5px;}
+
+        .format-select { padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #333; cursor: pointer; }
+        .slot-select { padding: 6px; border: 2px solid #e67e22; border-radius: 4px; font-weight: bold; color: #e67e22; cursor: pointer; background: #fff5eb; }
+
+        .stamp-gallery-container { display: flex; align-items: center; gap: 8px; overflow-x: auto; max-width: 150px; height: 100%; padding: 0 5px; }
+        .stamp-thumb { height: 40px; width: auto; object-fit: contain; border: 2px solid transparent; cursor: pointer; background: #fff; padding: 2px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; z-index: 2000; justify-content: center; align-items: center; flex-direction: column; }
+        .empty-state { color: #ccc; text-align: center; margin-top: 50px; font-size: 1.2rem; width: 100%; }
+        
+        input[type="color"] { width: 30px; height: 30px; border: none; padding: 0; background: none; cursor: pointer; }
+        input[type="range"] { width: 80px; }
+
+        #customContextMenu {
+            display: none; position: fixed; z-index: 3000;
+            background: white; border: 1px solid #bbb; border-radius: 4px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.2); min-width: 150px;
+        }
+        .context-menu-item {
+            padding: 10px 15px; cursor: pointer; font-size: 0.9rem; color: #333; display: flex; align-items: center; gap: 8px;
+        }
+        .context-menu-item:hover { background: #f0f7ff; color: #007bff; }
+
+        .cursor-pen .upper-canvas { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewport="0 0 24 24" style="fill:black;stroke:white;stroke-width:1px;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>') 0 24, auto !important; }
+        .cursor-highlight .upper-canvas { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewport="0 0 24 24" style="fill:orange;stroke:black;stroke-width:1px;"><path d="M15.25 2.25l-2.5 2.5 5 5 2.5-2.5-5-5zM2.25 15.25l5 5 10.5-10.5-5-5-10.5 10.5z"/></svg>') 0 24, auto !important; }
+        .cursor-text .upper-canvas { cursor: text !important; }
+        .cursor-crosshair .upper-canvas { cursor: crosshair !important; }
+    </style>
 </head>
 <body>
-<div id="loadingOverlay"><h2>⏳ กำลังประมวลผล...</h2></div>
-<div class="header-bar">PDF<span>Stamp</span></div>
-<div class="main-container">
-    <div class="sidebar">
-        <h2>📂 1. เอกสาร</h2>
-        <label for="dUp" class="upload-box">+ เพิ่มไฟล์ <p>(PDF/Image)</p></label>
-        <input type="file" id="dUp" multiple accept="image/*,application/pdf">
-        <div id="fList"></div>
-    </div>
-    <div class="workspace">
-        <div class="toolbar">
-            <label for="sUp" class="btn btn-blue">©️ ลายเซ็น</label>
-            <input type="file" id="sUp" multiple accept="image/*">
-            <div class="stamp-gallery-container" id="sGal"></div>
-            <div class="control-group">
-                <select id="slot" style="padding:8px"><option value="1">S1</option><option value="2">S2</option><option value="3">S3</option></select>
-                <button class="btn btn-orange" onclick="_sV()">💾 บันทึก</button>
-                <button class="btn btn-purple" onclick="_lD()">📂 คืนค่า</button>
-            </div>
-            <div class="control-group"><button class="btn btn-dark" onclick="_zm(-0.1)">➖</button><span id="zDs">100%</span><button class="btn btn-dark" onclick="_zm(0.1)">➕</button></div>
-            <div class="download-group"><select id="fmt" style="padding:8px"><option value="pdf">PDF</option><option value="jpg">JPG</option></select><button class="btn btn-green" onclick="_dl()">⬇️ โหลด</button></div>
+
+    <div id="customContextMenu">
+        <div class="context-menu-item" onclick="addTextToPresetFromMenu()">
+            ⭐ เพิ่มเป็นข้อความที่ใช้บ่อย
         </div>
-        <div class="canvas-scroll-area"><div id="scalableContent"></div></div>
     </div>
-</div>
-<script>
-(function(){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';let _pf=[],_ac=[],_ms=null,_z=1;const _q=s=>document.getElementById(s),_sc=_q('scalableContent'),_ld=_q('loadingOverlay');window._zm=d=>{_z+=d;_z=Math.max(0.1,Math.min(5,_z));_sc.style.transform=`scale(${_z})`;_q('zDs').innerText=Math.round(_z*100)+'%'};_q('dUp').onchange=async e=>{const fs=Array.from(e.target.files);if(!fs.length)return;_sL(1);for(let f of fs){let p=1,pdf=null;if(f.type==='application/pdf'){const b=await f.arrayBuffer();pdf=await pdfjsLib.getDocument(b).promise;p=pdf.numPages}_pf.push({id:Date.now()+Math.random(),file:f,name:f.name,type:f.type,pdfDoc:pdf,totalPages:p,selectedPages:[1]})}_rS();_rP();_sL(0);e.target.value=''};function _rS(){const l=_q('fList');l.innerHTML='';_pf.forEach(d=>{const i=document.createElement('div');i.className='file-item';i.innerHTML=`<div class="file-header"><span>📄 ${d.name}</span><span onclick="_rm('${d.id}')" style="color:red;cursor:pointer">&times;</span></div>`;const pC=document.createElement('div');pC.className='page-selector';for(let j=1;j<=d.totalPages;j++){const b=document.createElement('div');b.className='page-btn '+(d.selectedPages.includes(j)?'selected':'');b.innerText=j;b.onclick=()=>_tP(d.id,j);pC.appendChild(b)}i.appendChild(pC);l.appendChild(i)})}window._rm=id=>{_pf=_pf.filter(f=>f.id!=id);_rS();_rP()};function _tP(fid,p){const d=_pf.find(f=>f.id==fid);d.selectedPages.includes(p)?d.selectedPages=d.selectedPages.filter(x=>x!=p):d.selectedPages.push(p);d.selectedPages.sort((a,b)=>a-b);_rS();_rP()}async function _rP(){_sc.innerHTML='';_ac=[];if(!_pf.length)return;_sL(1);for(let d of _pf)for(let n of d.selectedPages){const w=document.createElement('div');w.className='canvas-wrapper-card';w.innerHTML=`<div class="page-label">${d.name} - P${n}</div>`;const cE=document.createElement('canvas');cE.id=`c_${d.id}_${n}`;w.appendChild(cE);_sc.appendChild(w);const fI=new fabric.Canvas(cE.id);let u,wt,ht;if(d.type==='application/pdf'){const p=await d.pdfDoc.getPage(n),v=p.getViewport({scale:2});const tC=document.createElement('canvas');tC.width=v.width;tC.height=v.height;await p.render({canvasContext:tC.getContext('2d'),viewport:v}).promise;u=tC.toDataURL();wt=v.width;ht=v.height}else{u=await _rF(d.file);const iO=await _lI(u);wt=iO.width;ht=iO.height}await new Promise(r=>fabric.Image.fromURL(u,img=>{fI.setWidth(wt);fI.setHeight(ht);fI.setBackgroundImage(img,fI.renderAll.bind(fI));r()}));if(_ms)await _aM(fI);_ac.push({fid:d.id,pn:n,canvas:fI})}_sL(0)}function _rF(f){return new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f)})}function _lI(u){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=u})}function _sL(s){_ld.style.display=s?'flex':'none'}window._sV=()=>{if(!_ac.length)return;const s=_q('slot').value,ob=_ac[0].canvas.getObjects();if(!ob.length)return alert('No stamps');const j=JSON.stringify(_ac[0].canvas.toJSON(['id']).objects);localStorage.setItem(`ps_s_${s}_p`,j);_ms=j;alert('Saved Slot '+s)};window._lD=()=>{const s=_q('slot').value,p=localStorage.getItem(`ps_s_${s}_p`);if(p){_ms=p;_rP()}else alert('Empty')};function _aM(c){return new Promise(r=>{fabric.util.enlivenObjects(JSON.parse(_ms),os=>{os.forEach(o=>c.add(o));c.renderAll();r()})})}window._dl=async()=>{const ft=_q('fmt').value;_sL(1);const z=new JSZip();if(ft==='pdf'){const {jsPDF:JP}=window.jspdf;for(let f of _pf){const pD=new JP();pD.deletePage(1);for(let i=1;i<=f.totalPages;i++){const {da,w,h}=await _gR(f,i);pD.addPage([w,h],w>h?'l':'p');pD.addImage(da,'JPEG',0,0,w,h)}z.file(`${f.name}_S.pdf`,pD.output('blob'))}}else{for(let f of _pf){const fd=z.folder(f.name);for(let i=1;i<=f.totalPages;i++){const {da}=await _gR(f,i);fd.file(`P${i}.jpg`,await(await fetch(da)).blob())}}}saveAs(await z.generateAsync({type:"blob"}),"Signed.zip");_sL(0)};async function _gR(d,n){const a=_ac.find(c=>c.fid==d.id&&c.pn==n);if(a)return{da:a.canvas.toDataURL({format:'jpeg',quality:0.8}),w:a.canvas.width,h:a.canvas.height};const tC=document.createElement('canvas'),fT=new fabric.Canvas(tC);let w,h;if(d.type==='application/pdf'){const p=await d.pdfDoc.getPage(n),v=p.getViewport({scale:2});w=v.width;h=v.height;tC.width=w;tC.height=h;await p.render({canvasContext:tC.getContext('2d'),viewport:v}).promise;await new Promise(r=>fabric.Image.fromURL(tC.toDataURL(),i=>{fT.setWidth(w);fT.setHeight(h);fT.setBackgroundImage(i,r)}))}else{const u=await _rF(d.file);await new Promise(r=>fabric.Image.fromURL(u,i=>{w=i.width;h=i.height;fT.setWidth(w);fT.setHeight(h);fT.setBackgroundImage(i,r)}))}if(_ms)await _aM(fT);const da=fT.toDataURL({format:'jpeg',quality:0.8});fT.dispose();return{da,w,h}}})()
-</script>
+
+    <div id="loadingOverlay">
+        <h2>⏳ กำลังประมวลผล...</h2>
+        <p id="loadingText">กรุณารอสักครู่</p>
+    </div>
+
+    <div class="header-bar">
+        PDF<span>Stamp</span>
+        <div class="project-btn-group">
+            <button class="btn-proj" onclick="saveProject()">💾 Save Project (Template)</button>
+            <label class="btn-proj" for="projectLoad">📂 Open Project</label>
+            <input type="file" id="projectLoad" accept=".pdfstamp" style="display:none;" onchange="loadProject(this)">
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <h2>📂 1. จัดการเอกสาร</h2>
+            <label for="docUpload" class="upload-box">
+                <span style="font-size: 1.5rem;">+ เพิ่มเอกสาร</span>
+                <p>(PDF หรือ รูปภาพ)</p>
+            </label>
+            <input type="file" id="docUpload" accept="image/*,application/pdf" multiple>
+            <div id="fileList" class="file-list"></div>
+
+            <div class="preset-box">
+                <h2>📝 ข้อความที่ใช้บ่อย</h2>
+                <div class="preset-input-group">
+                    <input type="text" id="newPresetInput" class="preset-input" placeholder="พิมพ์ข้อความ แล้วกด Enter...">
+                    <button class="btn btn-green" onclick="addPreset()">+</button>
+                </div>
+                <div id="presetList" class="preset-list"></div>
+            </div>
+        </div>
+
+        <div class="workspace">
+            <div class="toolbar">
+                <div class="control-group">
+                    <button id="tool-select" class="btn btn-dark active-tool" onclick="setTool('select')" title="เลือก/ย้าย">👆</button>
+                    <button id="tool-pen" class="btn btn-dark" onclick="setTool('pen')" title="ดินสอ">✏️</button>
+                    <button id="tool-highlight" class="btn btn-dark" onclick="setTool('highlight')" title="ไฮไลท์ (เส้นตรง)">🖍️</button>
+                    <button id="tool-text" class="btn btn-dark" onclick="setTool('text')" title="พิมพ์ข้อความ">🅰️</button>
+                </div>
+
+                <div class="control-group">
+                    <div class="color-dot" style="background:black;" onclick="setPaletteColor('#000000')"></div>
+                    <div class="color-dot" style="background:#0000ff;" onclick="setPaletteColor('#0000ff')"></div>
+                    <div class="color-dot" style="background:red;" onclick="setPaletteColor('#ff0000')"></div>
+                    <div class="color-dot" style="background:#FFFF00;" onclick="setPaletteColor('#FFFF00')"></div>
+                    
+                    <input type="color" id="colorPicker" value="#000000" onchange="updateDrawSettings()" title="เลือกสีอิสระ">
+                    <input type="range" id="sizeSlider" min="1" max="50" value="3" oninput="updateDrawSettings()" title="ขนาด">
+                </div>
+
+                <label for="stampUpload" class="btn btn-blue" style="margin-left:5px;">©️ ตรา</label>
+                <input type="file" id="stampUpload" accept="image/png,image/jpeg" multiple>
+                <div class="stamp-gallery-container" id="stampGallery"></div>
+                
+                <div class="control-group">
+                    <select id="slotSelect" class="slot-select" onchange="loadFromSlot(this.value)">
+                        <option value="1">Slot 1</option>
+                        <option value="2">Slot 2</option>
+                        <option value="3">Slot 3</option>
+                        <option value="4">Slot 4</option>
+                        <option value="5">Slot 5</option>
+                    </select>
+                    <button class="btn btn-orange" onclick="saveToCurrentSlot()">💾</button>
+                    <button class="btn btn-purple" onclick="loadFromCurrentSlot()">📂</button>
+                </div>
+
+                <div class="control-group">
+                    <button class="btn btn-red" onclick="clearAllSignatures()">❌</button>
+                </div>
+
+                <div class="control-group">
+                    <button class="btn btn-dark" onclick="adjustZoom(-0.1)">🔍-</button>
+                    <span id="zoomDisplay" class="zoom-label" style="width:35px;">100%</span>
+                    <button class="btn btn-dark" onclick="adjustZoom(0.1)">🔍+</button>
+                </div>
+                
+                <div class="download-group">
+                    <select id="dlFormat" class="format-select">
+                        <option value="pdf">PDF</option>
+                        <option value="jpg">JPG</option>
+                    </select>
+                    <button class="btn btn-green" onclick="downloadAllFiles()">⬇️</button>
+                </div>
+            </div>
+
+            <div class="canvas-scroll-area">
+                <div id="scalableContent">
+                    <div class="empty-state">เลือกเอกสารและหน้าทางซ้าย เพื่อเริ่มทำงาน</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Global State ---
+        let projectFiles = []; 
+        let activeCanvases = []; 
+        let masterStampsJSON = null; 
+        let currentZoom = 1.0;
+        let currentTool = 'select'; 
+        let drawColor = '#000000';
+        let drawWidth = 3;
+        let isDrawingLine = false;
+        let lineToDraw = null;
+        let pageHistory = {}; 
+        let textPresets = [];
+        let activeTextForMenu = null;
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const lastSlot = localStorage.getItem('pdfstamp_last_slot') || "1";
+            document.getElementById('slotSelect').value = lastSlot;
+            loadFromSlot(lastSlot, true); 
+            const savedPresets = localStorage.getItem('pdfstamp_presets');
+            if(savedPresets) textPresets = JSON.parse(savedPresets);
+            renderPresets();
+            document.getElementById('newPresetInput').addEventListener('keydown', (e) => {
+                if(e.key === 'Enter') addPreset();
+            });
+            window.addEventListener('click', () => {
+                document.getElementById('customContextMenu').style.display = 'none';
+            });
+        });
+
+        function setTool(tool) {
+            currentTool = tool;
+            if (tool === 'highlight' && drawColor === '#000000') setPaletteColor('#FFFF00');
+            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active-tool'));
+            if(document.getElementById(`tool-${tool}`)) document.getElementById(`tool-${tool}`).classList.add('active-tool');
+            activeCanvases.forEach(item => {
+                const wrapper = item.canvas.wrapperEl; 
+                wrapper.classList.remove('cursor-pen', 'cursor-highlight', 'cursor-text', 'cursor-crosshair');
+                if (tool === 'pen') wrapper.classList.add('cursor-pen');
+                else if (tool === 'highlight') wrapper.classList.add('cursor-highlight');
+                else if (tool === 'text') wrapper.classList.add('cursor-text');
+                applyToolSettings(item.canvas);
+            });
+        }
+
+        function setPaletteColor(color) {
+            document.getElementById('colorPicker').value = color;
+            updateDrawSettings();
+        }
+
+        function updateDrawSettings() {
+            drawColor = document.getElementById('colorPicker').value;
+            drawWidth = parseInt(document.getElementById('sizeSlider').value, 10);
+            activeCanvases.forEach(item => {
+                const activeObj = item.canvas.getActiveObject();
+                if (activeObj) {
+                    saveHistory(item.canvas); 
+                    if (activeObj.type === 'i-text') activeObj.set({ fill: drawColor });
+                    else if (activeObj.type === 'path') activeObj.set({ stroke: drawColor, strokeWidth: drawWidth });
+                    else if (activeObj.type === 'line') {
+                        const isHighlight = activeObj.opacity < 1;
+                        activeObj.set({ stroke: drawColor, strokeWidth: isHighlight ? drawWidth * 6 : drawWidth });
+                    }
+                    item.canvas.renderAll();
+                }
+                if (item.canvas.freeDrawingBrush) {
+                    item.canvas.freeDrawingBrush.color = drawColor;
+                    item.canvas.freeDrawingBrush.width = drawWidth;
+                }
+            });
+        }
+
+        function applyToolSettings(canvas) {
+            canvas.isDrawingMode = false;
+            canvas.selection = true;
+            canvas.skipTargetFind = false;
+            canvas.defaultCursor = 'default';
+            canvas.off('mouse:down', handleMouseDown);
+            canvas.off('mouse:move', handleMouseMove);
+            canvas.off('mouse:up', handleMouseUp);
+            if (currentTool === 'pen') {
+                canvas.isDrawingMode = true;
+                canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+                canvas.freeDrawingBrush.color = drawColor;
+                canvas.freeDrawingBrush.width = drawWidth;
+            } else if (currentTool === 'highlight' || currentTool === 'text') {
+                canvas.selection = false; 
+                canvas.skipTargetFind = true; 
+                canvas.on('mouse:down', handleMouseDown);
+                canvas.on('mouse:move', handleMouseMove);
+                canvas.on('mouse:up', handleMouseUp);
+            }
+        }
+
+        function handleMouseDown(o) {
+            const canvas = this;
+            const pointer = canvas.getPointer(o.e);
+            if (currentTool === 'text') {
+                saveHistory(canvas);
+                const text = new fabric.IText('ข้อความ', {
+                    left: pointer.x, top: pointer.y,
+                    fontFamily: 'TH Sarabun PSK, Sarabun, sans-serif', 
+                    fill: '#0000ff', fontSize: 16, cursorColor: 'blue'
+                });
+                canvas.add(text);
+                canvas.setActiveObject(text);
+                text.enterEditing();
+                setTool('select');
+                return;
+            }
+            if (currentTool === 'highlight') {
+                isDrawingLine = true;
+                saveHistory(canvas);
+                const width = drawWidth * 6;
+                lineToDraw = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+                    strokeWidth: width, fill: drawColor, stroke: drawColor, opacity: 0.35, 
+                    selectable: true, strokeLineCap: 'butt', evented: true, originX: 'center', originY: 'center' 
+                });
+                canvas.add(lineToDraw);
+            }
+        }
+
+        function handleMouseMove(o) {
+            if (!isDrawingLine) return;
+            const canvas = this;
+            const pointer = canvas.getPointer(o.e);
+            lineToDraw.set({ x2: pointer.x, y2: pointer.y });
+            canvas.renderAll();
+        }
+
+        function handleMouseUp(o) {
+            if(isDrawingLine) { isDrawingLine = false; lineToDraw.setCoords(); }
+        }
+
+        function renderPresets() {
+            const list = document.getElementById('presetList');
+            list.innerHTML = '';
+            textPresets.forEach((txt, index) => {
+                const item = document.createElement('div');
+                item.className = 'preset-item';
+                item.innerHTML = `<span onclick="applyPreset('${txt}')">${txt}</span> <span class="preset-del" onclick="delPreset(${index})">&times;</span>`;
+                list.appendChild(item);
+            });
+        }
+
+        function addPreset(textToAdd = null) {
+            if (!textToAdd) {
+                const input = document.getElementById('newPresetInput');
+                textToAdd = input.value.trim();
+                if(textToAdd) input.value = '';
+            }
+            if(textToAdd) {
+                if(!textPresets.includes(textToAdd)){
+                    textPresets.push(textToAdd);
+                    localStorage.setItem('pdfstamp_presets', JSON.stringify(textPresets));
+                    renderPresets();
+                }
+            }
+        }
+
+        function delPreset(index) {
+            textPresets.splice(index, 1);
+            localStorage.setItem('pdfstamp_presets', JSON.stringify(textPresets));
+            renderPresets();
+        }
+
+        // 1. FIXED: Always add NEW text object even if text content is the same (Unlimited Add)
+        function applyPreset(txt) {
+            if (activeCanvases.length === 0) return alert('กรุณาเลือกหน้าเอกสารก่อนครับ');
+            
+            const target = activeCanvases[0].canvas; 
+            saveHistory(target); 
+            
+            const textObj = new fabric.IText(txt, {
+                // Modified: Offset slightly if stacked to make selection easier
+                left: target.width - 20, 
+                top: target.height - 20,      
+                fontFamily: 'TH Sarabun PSK, Sarabun, sans-serif',
+                fill: '#0000ff', 
+                fontSize: 16,
+                originX: 'right', 
+                originY: 'bottom', 
+                cursorColor: 'blue'
+            });
+
+            target.add(textObj);
+            target.setActiveObject(textObj); // Makes the latest one ready to be dragged
+            target.renderAll();
+            setTool('select'); 
+        }
+
+        function showContextMenu(x, y) {
+            const menu = document.getElementById('customContextMenu');
+            menu.style.display = 'block'; menu.style.left = x + 'px'; menu.style.top = y + 'px';
+        }
+
+        function addTextToPresetFromMenu() {
+            if (activeTextForMenu && activeTextForMenu.text) addPreset(activeTextForMenu.text);
+            document.getElementById('customContextMenu').style.display = 'none';
+        }
+
+        window.addEventListener('contextmenu', e => { if(e.target.tagName === 'CANVAS') e.preventDefault(); });
+
+        function initHistory(canvasId) { if (!pageHistory[canvasId]) pageHistory[canvasId] = { undo: [], redo: [] }; }
+
+        function saveHistory(canvas) {
+            const id = canvas.getElement().id; initHistory(id);
+            if (pageHistory[id].undo.length > 20) pageHistory[id].undo.shift();
+            pageHistory[id].undo.push(JSON.stringify(canvas.toJSON(['id'])));
+            pageHistory[id].redo = []; 
+        }
+
+        function undo(canvas) {
+            const id = canvas.getElement().id; initHistory(id);
+            if (pageHistory[id].undo.length === 0) return;
+            pageHistory[id].redo.push(JSON.stringify(canvas.toJSON(['id'])));
+            loadCanvasState(canvas, pageHistory[id].undo.pop());
+        }
+
+        function loadCanvasState(canvas, jsonStr) {
+            const json = JSON.parse(jsonStr);
+            const bg = canvas.backgroundImage; 
+            canvas.loadFromJSON(json, function() {
+                canvas.setBackgroundImage(bg, canvas.renderAll.bind(canvas));
+                applyToolSettings(canvas); 
+            });
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); activeCanvases.forEach(item => undo(item.canvas)); }
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                if(document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return; 
+                activeCanvases.forEach(item => {
+                    const activeObjects = item.canvas.getActiveObjects();
+                    if (activeObjects.length) {
+                        saveHistory(item.canvas); item.canvas.discardActiveObject();
+                        activeObjects.forEach(obj => item.canvas.remove(obj));
+                    }
+                });
+            }
+        });
+
+        function attachHistoryEvents(canvas) {
+            canvas.on('object:modified', () => saveHistory(canvas));
+            canvas.on('path:created', () => saveHistory(canvas)); 
+        }
+
+        async function saveProject() {
+            if(projectFiles.length === 0) return alert('ไม่มีข้อมูลให้บันทึก');
+            showLoading(true);
+            try {
+                const fileDataPromises = projectFiles.map(async (p) => {
+                    const base64 = await readFileAsDataURL(p.file);
+                    return { name: p.name, type: p.type, selectedPages: p.selectedPages, data: base64 };
+                });
+                const filesData = await Promise.all(fileDataPromises);
+                const projectData = {
+                    version: "1.0", timestamp: new Date().toISOString(), files: filesData,
+                    presets: textPresets, masterStamps: masterStampsJSON,
+                    slots: {
+                        1: localStorage.getItem('pdfstamp_slot_1_pos'),
+                        2: localStorage.getItem('pdfstamp_slot_2_pos'),
+                        3: localStorage.getItem('pdfstamp_slot_3_pos'),
+                        4: localStorage.getItem('pdfstamp_slot_4_pos'),
+                        5: localStorage.getItem('pdfstamp_slot_5_pos')
+                    }
+                };
+                saveAs(new Blob([JSON.stringify(projectData)], {type: "application/json"}), `PDFStamp_Project_${Date.now()}.pdfstamp`);
+            } catch(e) { alert('ผิดพลาด: ' + e.message); }
+            showLoading(false);
+        }
+
+        function loadProject(input) {
+            const file = input.files[0]; if(!file) return;
+            showLoading(true);
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    textPresets = data.presets || [];
+                    localStorage.setItem('pdfstamp_presets', JSON.stringify(textPresets));
+                    renderPresets();
+                    if(data.masterStamps) { masterStampsJSON = data.masterStamps; localStorage.setItem('pdfstamp_master_pos', masterStampsJSON); }
+                    if(data.slots) { for(let k in data.slots) if(data.slots[k]) localStorage.setItem(`pdfstamp_slot_${k}_pos`, data.slots[k]); }
+                    projectFiles = []; activeCanvases = [];
+                    for(let fData of data.files) {
+                        const res = await fetch(fData.data);
+                        const blob = await res.blob();
+                        const restoredFile = new File([blob], fData.name, { type: fData.type });
+                        let pdfDoc = null; let pages = 1;
+                        if (fData.type === 'application/pdf') {
+                            const ab = await restoredFile.arrayBuffer();
+                            pdfDoc = await pdfjsLib.getDocument(ab).promise;
+                            pages = pdfDoc.numPages;
+                        }
+                        projectFiles.push({ id: Date.now() + Math.random().toString(16).slice(2), file: restoredFile, name: fData.name, type: fData.type, pdfDoc: pdfDoc, totalPages: pages, selectedPages: fData.selectedPages });
+                    }
+                    renderSidebar(); await renderRightPanel(); 
+                    alert('✅ เปิดโปรเจกต์เรียบร้อย');
+                } catch(err) { alert('ผิดพลาด: ' + err.message); }
+                showLoading(false); input.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function adjustZoom(delta) {
+            currentZoom += delta;
+            if (currentZoom < 0.1) currentZoom = 0.1;
+            if (currentZoom > 5.0) currentZoom = 5.0;
+            document.getElementById('scalableContent').style.transform = `scale(${currentZoom})`;
+            document.getElementById('zoomDisplay').innerText = Math.round(currentZoom * 100) + '%';
+        }
+
+        document.getElementById('docUpload').addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files); if(files.length === 0) return;
+            showLoading(true);
+            for (let file of files) {
+                let pages = 1; let pdfDoc = null;
+                if (file.type === 'application/pdf') {
+                    const arrayBuffer = await file.arrayBuffer();
+                    pdfDoc = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    pages = pdfDoc.numPages;
+                }
+                projectFiles.push({ id: Date.now() + Math.random().toString(16).slice(2), file: file, name: file.name, type: file.type, pdfDoc: pdfDoc, totalPages: pages, selectedPages: [1] });
+            }
+            renderSidebar(); renderRightPanel(); showLoading(false); e.target.value = '';
+        });
+
+        function renderSidebar() {
+            const listEl = document.getElementById('fileList'); listEl.innerHTML = '';
+            projectFiles.forEach(doc => {
+                const item = document.createElement('div'); item.className = 'file-item';
+                const header = document.createElement('div'); header.className = 'file-header';
+                const nameWrap = document.createElement('div'); nameWrap.style.display = 'flex'; nameWrap.style.alignItems = 'center';
+                nameWrap.innerHTML = `<span>📄 ${doc.name}</span>`;
+                const allBtn = document.createElement('button'); allBtn.className = 'btn-all'; allBtn.innerText = 'All';
+                allBtn.onclick = (e) => { e.stopPropagation(); toggleAllPages(doc.id); };
+                nameWrap.appendChild(allBtn); header.appendChild(nameWrap);
+                const removeBtn = document.createElement('span'); removeBtn.className = 'file-remove'; removeBtn.innerHTML = '&times;';
+                removeBtn.onclick = (e) => { e.stopPropagation(); removeFile(doc.id); };
+                header.appendChild(removeBtn); item.appendChild(header);
+                const pageContainer = document.createElement('div'); pageContainer.className = 'page-selector';
+                for (let i = 1; i <= doc.totalPages; i++) {
+                    const pageBtn = document.createElement('div'); pageBtn.innerText = i;
+                    pageBtn.className = doc.selectedPages.includes(i) ? 'page-btn selected' : 'page-btn';
+                    pageBtn.onclick = (e) => { e.stopPropagation(); togglePageSelection(doc.id, i); };
+                    pageContainer.appendChild(pageBtn);
+                }
+                item.appendChild(pageContainer); listEl.appendChild(item);
+            });
+        }
+
+        function toggleAllPages(fileId) {
+            const doc = projectFiles.find(f => f.id === fileId); if (!doc) return;
+            if (doc.selectedPages.length === doc.totalPages) doc.selectedPages = [];
+            else doc.selectedPages = Array.from({length: doc.totalPages}, (_, i) => i + 1);
+            renderSidebar(); renderRightPanel();
+        }
+
+        function togglePageSelection(fileId, pageNum) {
+            const doc = projectFiles.find(f => f.id === fileId); if (!doc) return;
+            if (doc.selectedPages.includes(pageNum)) doc.selectedPages = doc.selectedPages.filter(p => p !== pageNum);
+            else { doc.selectedPages.push(pageNum); doc.selectedPages.sort((a,b) => a-b); }
+            renderSidebar(); renderRightPanel(); 
+        }
+
+        function removeFile(id) { projectFiles = projectFiles.filter(f => f.id !== id); renderSidebar(); renderRightPanel(); }
+
+        async function renderRightPanel() {
+            const container = document.getElementById('scalableContent'); container.innerHTML = ''; activeCanvases = []; 
+            if (projectFiles.length === 0) { container.innerHTML = '<div class="empty-state">เลือกเอกสารและหน้าทางซ้าย เพื่อเริ่มทำงาน</div>'; return; }
+            let hasSelection = false;
+            for (let doc of projectFiles) {
+                for (let pageNum of doc.selectedPages) {
+                    hasSelection = true;
+                    const wrapper = document.createElement('div'); wrapper.className = 'canvas-wrapper-card';
+                    const label = document.createElement('div'); label.className = 'page-label';
+                    label.innerHTML = `ไฟล์: <span>${doc.name}</span> - หน้า <span>${pageNum}</span>`;
+                    wrapper.appendChild(label);
+                    const canvasEl = document.createElement('canvas'); canvasEl.id = `c_${doc.id}_${pageNum}`;
+                    wrapper.appendChild(canvasEl); container.appendChild(wrapper);
+                    const fabricInstance = new fabric.Canvas(canvasEl.id);
+                    fabricInstance.on('mouse:down', function(opt) {
+                        if (opt.e.button === 2 && opt.target && opt.target.type === 'i-text') {
+                            activeTextForMenu = opt.target; showContextMenu(opt.e.clientX, opt.e.clientY);
+                            fabricInstance.setActiveObject(opt.target); fabricInstance.renderAll();
+                        } else { document.getElementById('customContextMenu').style.display = 'none'; }
+                    });
+                    attachHistoryEvents(fabricInstance); applyToolSettings(fabricInstance);
+                    let width, height, imgUrl; const renderScale = 2.0; 
+                    if (doc.type === 'application/pdf') {
+                        const page = await doc.pdfDoc.getPage(pageNum); const viewport = page.getViewport({ scale: renderScale });
+                        const tempCan = document.createElement('canvas'); tempCan.width = viewport.width; tempCan.height = viewport.height;
+                        await page.render({ canvasContext: tempCan.getContext('2d'), viewport }).promise;
+                        imgUrl = tempCan.toDataURL(); width = viewport.width; height = viewport.height;
+                    } else {
+                        imgUrl = await readFileAsDataURL(doc.file); const imgObj = await loadImage(imgUrl);
+                        width = imgObj.width; height = imgObj.height;
+                    }
+                    await new Promise(r => { fabric.Image.fromURL(imgUrl, (img) => { fabricInstance.setWidth(width); fabricInstance.setHeight(height); fabricInstance.setBackgroundImage(img, fabricInstance.renderAll.bind(fabricInstance)); r(); }); });
+                    if (masterStampsJSON) await applyMasterStamps(fabricInstance);
+                    activeCanvases.push({ fileId: doc.id, pageNum: pageNum, canvas: fabricInstance });
+                }
+            }
+            if (!hasSelection) container.innerHTML = '<div class="empty-state">กรุณาเลือกหน้าเอกสารด้านซ้าย</div>';
+            setTool(currentTool);
+        }
+
+        document.getElementById('stampUpload').addEventListener('change', function(e) {
+            Array.from(e.target.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (f) => { addToGallery(f.target.result); addStampToAll(f.target.result); };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        function addToGallery(src) {
+            const img = document.createElement('img'); img.src = src; img.className = 'stamp-thumb';
+            img.onclick = () => addStampToAll(src); document.getElementById('stampGallery').appendChild(img);
+        }
+
+        function addStampToAll(url) {
+            if (activeCanvases.length === 0) return alert('ไม่มีหน้าเอกสารแสดงอยู่');
+            activeCanvases.forEach(item => {
+                saveHistory(item.canvas);
+                fabric.Image.fromURL(url, (img) => {
+                    img.scale(0.5); img.set({ left: item.canvas.width/2 - (img.width*img.scaleX)/2, top: item.canvas.height/2 - (img.height*img.scaleY)/2 });
+                    item.canvas.add(img); item.canvas.setActiveObject(img);
+                });
+            });
+            setTool('select'); 
+        }
+
+        function saveToCurrentSlot() {
+            if (activeCanvases.length === 0) return;
+            const slot = document.getElementById('slotSelect').value;
+            const firstCanvas = activeCanvases[0].canvas;
+            const jsonStr = JSON.stringify(firstCanvas.toJSON(['id']));
+            localStorage.setItem(`pdfstamp_slot_${slot}_pos`, jsonStr);
+            const objects = firstCanvas.getObjects();
+            const imgObj = objects.find(o => o.type === 'image');
+            if (imgObj) localStorage.setItem(`pdfstamp_slot_${slot}_img`, imgObj.getSrc());
+            localStorage.setItem('pdfstamp_last_slot', slot); masterStampsJSON = jsonStr; 
+            alert(`✅ บันทึก Slot ${slot} เรียบร้อย`);
+        }
+
+        function loadFromCurrentSlot() { loadFromSlot(document.getElementById('slotSelect').value); }
+
+        function loadFromSlot(slot, silent = false) {
+            const savedPos = localStorage.getItem(`pdfstamp_slot_${slot}_pos`);
+            const savedImg = localStorage.getItem(`pdfstamp_slot_${slot}_img`);
+            if (savedPos) {
+                masterStampsJSON = savedPos; localStorage.setItem('pdfstamp_last_slot', slot); 
+                if(!silent) console.log(`Loaded Slot ${slot}`);
+                if (savedImg) addToGallery(savedImg);
+                if (activeCanvases.length > 0) renderRightPanel(); 
+            } else { if(!silent) alert(`Slot ${slot} ว่างเปล่า`); masterStampsJSON = null; }
+        }
+
+        function clearAllSignatures() {
+            if(!confirm('ยืนยันลบทั้งหมด?')) return;
+            activeCanvases.forEach(item => { saveHistory(item.canvas); item.canvas.clear(); });
+            renderRightPanel();
+        }
+
+        function applyMasterStamps(canvasInstance) {
+            return new Promise(resolve => {
+                fabric.util.enlivenObjects(JSON.parse(masterStampsJSON), (objs) => {
+                    objs.forEach(o => { o.set('dirty', true); canvasInstance.add(o); });
+                    canvasInstance.renderAll(); resolve();
+                });
+            });
+        }
+
+        function downloadAllFiles() {
+            const format = document.getElementById('dlFormat').value;
+            if (format === 'pdf') downloadAllFilesPDFZip(); else downloadAllFilesJPGZip();
+        }
+
+        async function downloadAllFilesPDFZip() {
+            if (projectFiles.length === 0) return alert('ไม่มีไฟล์');
+            showLoading(true);
+            const zip = new JSZip(); const { jsPDF } = window.jspdf;
+            for (let f of projectFiles) {
+                const pdfDoc = new jsPDF(); pdfDoc.deletePage(1);
+                for (let i = 1; i <= f.totalPages; i++) {
+                    const {data, width, height} = await getRenderedPageData(f, i, f.selectedPages.includes(i));
+                    const orientation = width > height ? 'l' : 'p';
+                    pdfDoc.addPage([width, height], orientation); pdfDoc.addImage(data, 'JPEG', 0, 0, width, height);
+                }
+                zip.file(`${f.name}_signed.pdf`, pdfDoc.output('blob'));
+            }
+            saveAs(await zip.generateAsync({ type: "blob" }), "Signed_Documents.zip");
+            showLoading(false);
+        }
+
+        async function downloadAllFilesJPGZip() {
+            if (projectFiles.length === 0) return alert('ไม่มีไฟล์');
+            showLoading(true);
+            const zip = new JSZip();
+            for (let f of projectFiles) {
+                const folder = zip.folder(f.name);
+                for (let i = 1; i <= f.totalPages; i++) {
+                    const {data} = await getRenderedPageData(f, i, f.selectedPages.includes(i));
+                    folder.file(`Page_${i}.jpg`, await (await fetch(data)).blob());
+                }
+            }
+            saveAs(await zip.generateAsync({ type: "blob" }), "Signed_Images_JPG.zip");
+            showLoading(false);
+        }
+
+        async function getRenderedPageData(doc, pageNum, forceStamp = true) {
+            const active = activeCanvases.find(c => c.fileId === doc.id && c.pageNum === pageNum);
+            if (active && forceStamp) {
+                active.canvas.discardActiveObject(); active.canvas.renderAll();
+                return { data: active.canvas.toDataURL({ format: 'jpeg', quality: 0.8 }), width: active.canvas.width, height: active.canvas.height };
+            } else { return await renderOffScreen(doc, pageNum, forceStamp); }
+        }
+
+        async function renderOffScreen(doc, pageNum, includeStamp) {
+            const tempCanvasEl = document.createElement('canvas'); const fabricTemp = new fabric.Canvas(tempCanvasEl);
+            let width, height;
+            if (doc.type === 'application/pdf') {
+                const page = await doc.pdfDoc.getPage(pageNum); const viewport = page.getViewport({ scale: 2.0 });
+                width = viewport.width; height = viewport.height; tempCanvasEl.width = width; tempCanvasEl.height = height;
+                await page.render({ canvasContext: tempCanvasEl.getContext('2d'), viewport }).promise;
+                const imgUrl = tempCanvasEl.toDataURL();
+                await new Promise(r => fabric.Image.fromURL(imgUrl, img => { fabricTemp.setWidth(width); fabricTemp.setHeight(height); fabricTemp.setBackgroundImage(img, r); }));
+            } else {
+                const url = await readFileAsDataURL(doc.file); const imgObj = await loadImage(url);
+                width = imgObj.width; height = imgObj.height;
+                await new Promise(r => fabric.Image.fromURL(url, img => { fabricTemp.setWidth(width); fabricTemp.setHeight(height); fabricTemp.setBackgroundImage(img, r); }));
+            }
+            if (includeStamp && masterStampsJSON) await applyMasterStamps(fabricTemp);
+            const data = fabricTemp.toDataURL({ format: 'jpeg', quality: 0.8 });
+            fabricTemp.dispose(); return { data, width, height };
+        }
+
+        function readFileAsDataURL(file) { return new Promise((resolve) => { const reader = new FileReader(); reader.onload = (e) => resolve(e.target.result); reader.readAsDataURL(file); }); }
+        function loadImage(url) { return new Promise((resolve) => { const img = new Image(); img.onload = () => resolve(img); img.src = url; }); }
+        function showLoading(show) { document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none'; }
+    </script>
 </body>
 </html>
